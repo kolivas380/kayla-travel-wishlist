@@ -3,3 +3,5 @@ export type Destination = {
   city: string;
   country: string;
 };
+
+export type NewDestination = Omit<Destination, "id">;

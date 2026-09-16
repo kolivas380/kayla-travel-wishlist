@@ -1,8 +1,51 @@
-// Keep the shared API base URL in one place instead of repeating it in components.
-export const XANO_BASE_URL = import.meta.env.VITE_XANO_BASE_URL;
+import type { Destination, NewDestination } from "@/types/destination";
 
-// TODO: Create a function that retrieves destinations from Xano.
-// Use async/await, native fetch(), and check response.ok before reading the response.
+const XANO_BASE_URL = import.meta.env.VITE_XANO_BASE_URL;
+const DESTINATION_PATH = "/travel_wishlist";
 
-// TODO: Create a function that adds a destination to Xano.
-// Never put secrets or private API keys in frontend environment variables.
+function getDestinationUrl() {
+  const baseUrl = XANO_BASE_URL?.trim().replace(/\/+$/, "");
+
+  if (!baseUrl) {
+    throw new Error("Add your Xano API base URL to the .env file, then restart the development server.");
+  }
+
+  return `${baseUrl}${DESTINATION_PATH}`;
+}
+
+async function getErrorMessage(response: Response) {
+  const fallbackMessage = `Request failed with status ${response.status}.`;
+
+  try {
+    const responseBody = (await response.json()) as { message?: string };
+    return responseBody.message ?? fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+}
+
+export async function getDestinations(): Promise<Destination[]> {
+  const response = await fetch(getDestinationUrl());
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return (await response.json()) as Destination[];
+}
+
+export async function addDestination(destination: NewDestination): Promise<Destination> {
+  const response = await fetch(getDestinationUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(destination),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return (await response.json()) as Destination;
+}

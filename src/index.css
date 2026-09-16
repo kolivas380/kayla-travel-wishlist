@@ -12,6 +12,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-input: var(--input);
   --radius-sm: calc(var(--radius) * 0.75);
   --radius-md: calc(var(--radius) * 0.875);
   --radius-lg: var(--radius);
@@ -31,6 +32,7 @@
   --muted: color-mix(in srgb, #776464 10%, #efebe5);
   --muted-foreground: #776464;
   --border: color-mix(in srgb, #776464 35%, #efebe5);
+  --input: color-mix(in srgb, #776464 45%, #efebe5);
   --ring: #ff7e73;
 }
 

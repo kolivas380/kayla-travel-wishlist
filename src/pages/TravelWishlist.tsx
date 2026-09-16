@@ -1,10 +1,22 @@
+import { useQuery } from "@tanstack/react-query";
+
 import { DestinationForm } from "@/components/DestinationForm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DestinationList } from "@/components/DestinationList";
 import gdcLogo from "@/assets/gdc-logo.png";
+import { getDestinations } from "@/lib/api";
+import { destinationQueryKey } from "@/lib/queryKeys";
 
 export function TravelWishlist() {
-  // TODO: Use useQuery to retrieve destinations from Xano.
-  // TODO: Add loading, error, empty, and success states for the destination list.
+  const {
+    data: destinations = [],
+    error,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: destinationQueryKey,
+    queryFn: getDestinations,
+  });
 
   return (
     <main className="min-h-screen bg-background px-4 py-12 text-foreground sm:px-6">
@@ -22,15 +34,13 @@ export function TravelWishlist() {
         </header>
 
         <DestinationForm />
-
-        <Card>
-          <CardHeader><CardTitle>My Destinations</CardTitle></CardHeader>
-          <CardContent>
-            <div className="rounded-lg border border-dashed border-border bg-muted/50 p-8 text-center">
-              <p className="text-sm text-muted-foreground">Display destinations here</p>
-            </div>
-          </CardContent>
-        </Card>
+        <DestinationList
+          destinations={destinations}
+          error={error}
+          isLoading={isPending}
+          isRefreshing={isFetching}
+          onRetry={() => void refetch()}
+        />
       </div>
     </main>
   );

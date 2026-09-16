@@ -1,18 +1,100 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { addDestination } from "@/lib/api";
+import { destinationQueryKey } from "@/lib/queryKeys";
+
+const destinationSchema = z.object({
+  city: z.string().trim().min(1, "City is required."),
+  country: z.string().trim().min(1, "Country is required."),
+});
+
+type DestinationFormValues = z.infer<typeof destinationSchema>;
 
 export function DestinationForm() {
-  // TODO: Define the city and country validation rules with Zod.
-  // TODO: Connect the validation schema to React Hook Form.
-  // TODO: Use a TanStack Query mutation to submit the form to Xano.
-  // TODO: Refresh the destination list after a destination is added successfully.
+  const queryClient = useQueryClient();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<DestinationFormValues>({
+    resolver: zodResolver(destinationSchema),
+    defaultValues: {
+      city: "",
+      country: "",
+    },
+  });
+
+  const addDestinationMutation = useMutation({
+    mutationFn: addDestination,
+    onSuccess: async () => {
+      reset();
+      await queryClient.invalidateQueries({ queryKey: destinationQueryKey });
+    },
+  });
+
+  function onSubmit(values: DestinationFormValues) {
+    addDestinationMutation.mutate(values);
+  }
 
   return (
     <Card>
-      <CardHeader><CardTitle>Add a destination</CardTitle></CardHeader>
+      <CardHeader>
+        <CardTitle>Add a destination</CardTitle>
+      </CardHeader>
       <CardContent>
-        <div className="rounded-lg border border-dashed border-border bg-muted/50 p-8 text-center">
-          <p className="text-sm text-muted-foreground">Destination form</p>
-        </div>
+        <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <div className="space-y-2">
+            <Label htmlFor="city">City</Label>
+            <Input
+              id="city"
+              placeholder="Chicago"
+              autoComplete="address-level2"
+              aria-invalid={Boolean(errors.city)}
+              aria-describedby={errors.city ? "city-error" : undefined}
+              {...register("city")}
+            />
+            {errors.city ? (
+              <p id="city-error" className="text-sm font-medium text-red-700" role="alert">
+                {errors.city.message}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="country">Country</Label>
+            <Input
+              id="country"
+              placeholder="United States"
+              autoComplete="country-name"
+              aria-invalid={Boolean(errors.country)}
+              aria-describedby={errors.country ? "country-error" : undefined}
+              {...register("country")}
+            />
+            {errors.country ? (
+              <p id="country-error" className="text-sm font-medium text-red-700" role="alert">
+                {errors.country.message}
+              </p>
+            ) : null}
+          </div>
+
+          {addDestinationMutation.error ? (
+            <p className="rounded-md border border-red-700/30 bg-red-50 p-3 text-sm text-red-800" role="alert">
+              {addDestinationMutation.error.message}
+            </p>
+          ) : null}
+
+          <Button className="w-full sm:w-auto" type="submit" disabled={addDestinationMutation.isPending}>
+            {addDestinationMutation.isPending ? "Adding destination..." : "Add destination"}
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );
