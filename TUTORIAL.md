@@ -1118,30 +1118,6 @@ label.tsx
 
 These are reusable UI building blocks.
 
-If these files are already included in your starter repository, do not recreate them.
-
-If they are not present, add them using the same shadcn/ui component setup used by the starter project before continuing.
-
-After this step, your UI directory should contain:
-
-```text id="71j9pz"
-src/components/ui/
-│
-├── button.tsx
-├── card.tsx
-├── input.tsx
-└── label.tsx
-```
-
-These components allow our feature code to use:
-
-```tsx id="l7nt1b"
-<Button />
-<Input />
-<Label />
-<Card />
-```
-
 instead of repeatedly building and styling these elements ourselves.
 
 ---
